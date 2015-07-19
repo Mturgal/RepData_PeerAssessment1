@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ###About the Research
@@ -37,7 +32,8 @@ The variables included in this dataset are:
 (note: "s" is deliberately deleted from "https" from the URL because it causes problems in my system, in case there is a problem with downloading you may change "http" into "https")
   
 
-```{r,echo = TRUE}
+
+```r
 if(!file.exists("activity.csv")){
     temp <- tempfile()
 		URL ="http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
@@ -50,14 +46,29 @@ if(!file.exists("activity.csv")){
 str(activity)
 ```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
 
 2.Processing data
   
 - Converting date variable from factor to date format with the help of "as.date" function
  
-```{r,echo = TRUE}
+
+```r
 activity$date <- as.Date(activity$date, "%Y-%m-%d")
 str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 
@@ -66,46 +77,52 @@ str(activity)
 ## What is mean total number of steps taken per day?
 
 1.Calculating the total number of steps taken per day
-```{r,echo = TRUE}
+
+```r
 DailySums <- aggregate(steps~date,activity,sum)
 ```
 
 
 2.Making a histogram of the total number of steps taken each day.
 
-```{r,echo = TRUE}
-hist(DailySums$steps, main = "Histogram of Daily Total Steps with Missing Values", xlab= "Number of Steps")
 
+```r
+hist(DailySums$steps, main = "Histogram of Daily Total Steps with Missing Values", xlab= "Number of Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 3. Calculating and reporting the mean and median of the total number of steps taken per day
-```{r,echo = TRUE}
+
+```r
 Mean1 <- mean(DailySums$steps)
 Median1 <- median(DailySums$steps)
 ```
 
-The Mean is `r Mean1` and Median is `r Median1`
+The Mean is 1.0766189\times 10^{4} and Median is 10765
 
 ## What is the average daily activity pattern?
 
 1.Making a time Series plot  of the 5-minute interval and the average number of steps taken, averaged across all days interval :  
 
-```{r,echo = TRUE}
+
+```r
 IntMean <- aggregate(steps~interval,activity,mean)
 with(IntMean, plot(interval,steps, type="l", main = " Average Number of Steps Taken During Intervals ", xlab="Interval", ylab= "Average Number of Steps"))
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
 
 2.Finding which interval contains the maximum number of steps:
 
-```{r,echo = TRUE}
+
+```r
 Max1<- which.max(IntMean$steps)
 
 MaxInterval <- IntMean[Max1,]$interval
-
 ```
 
-The interval with the maximum number of steps is  `r MaxInterval` 
+The interval with the maximum number of steps is  835 
 
 ## Imputing missing values
  
@@ -114,45 +131,63 @@ The interval with the maximum number of steps is  `r MaxInterval`
   
 - The number of rows with missing values( i.e NA's) can be calculated with complete cases  
 Since TRUE values is annoted with "1" the sum function can be used to find out complete cases
-```{r,echo = TRUE}
+
+```r
 missing <-complete.cases(activity)
 NumComplete <- sum(missing)
 NumIncomplete <-nrow(activity)-NumComplete
 ```
 
-- The number of records with missing values is `r NumIncomplete`
+- The number of records with missing values is 2304
   
 2.Filling Missing Values with Interval Means
-```{r,echo = TRUE}
+
+```r
 MergedData <- merge(activity,IntMean,by.x ="interval",by.y = "interval",all=TRUE)
 colnames(MergedData) <- c("interval","steps","date","IntervalMean")
-
-
 ```
   
 3.Creating a new dataset that is equal to the original dataset but with the missing values filled in.  
-```{r,echo = TRUE}
+
+```r
 MergedData[is.na(MergedData$steps),]$steps <- MergedData[is.na(MergedData$steps),]$IntervalMean
 str(MergedData)
+```
+
+```
+## 'data.frame':	17568 obs. of  4 variables:
+##  $ interval    : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ steps       : num  1.72 0 0 0 0 ...
+##  $ date        : Date, format: "2012-10-01" "2012-11-23" ...
+##  $ IntervalMean: num  1.72 1.72 1.72 1.72 1.72 ...
 ```
    
 4.Making a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day
   
 - The Histogram :  
-```{r,echo = TRUE}
+
+```r
 DailySumsImputed<-aggregate(steps~date,MergedData,sum)
 hist(DailySumsImputed$steps, main = "Histogram of Daily Total Steps with Imputed Records", xlab= "Number of Steps")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
     
 - Calculating the mean and median total number of steps taken per day:  
-```{r,echo = TRUE}
+
+```r
 Mean2 <-mean(DailySumsImputed$steps)
 Median2 <-median(DailySumsImputed$steps)
 str(DailySumsImputed)
 ```
+
+```
+## 'data.frame':	61 obs. of  2 variables:
+##  $ date : Date, format: "2012-10-01" "2012-10-02" ...
+##  $ steps: num  10766 126 11352 12116 13294 ...
+```
    
-- The mean is  `r Mean2` and the median is "r Median2". 
+- The mean is  1.0766189\times 10^{4} and the median is "r Median2". 
    
 - Since the missing values are based on interval averages there is no change between the original data and the imputed data in terms of mean and median. However a closer look to the histograms show that there is an increase in middle (i.e increase in the number of days with average value)
   
@@ -161,7 +196,8 @@ str(DailySumsImputed)
 
 1.Creating a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day:
   
-```{r,echo = TRUE}
+
+```r
 MergedData$Weekdays <- weekdays(MergedData$date)
 MergedData$Weekend <- factor(MergedData$Weekdays %in% c("Saturday","Sunday"))
 levels(MergedData$Weekend) <-c("Weekday","Weekend")
@@ -171,7 +207,8 @@ levels(MergedData$Weekend) <-c("Weekday","Weekend")
   
 - First we are creating a new dataframe with averaged steps for the intervals both for weekend and weekdays  
 
-```{r,echo = TRUE}
+
+```r
 WeekendInterval <- aggregate(steps~interval+Weekend,data=MergedData,mean)
 ```
 
@@ -179,10 +216,20 @@ WeekendInterval <- aggregate(steps~interval+Weekend,data=MergedData,mean)
 - And then the panel plot for it:  
 (because of its ease of use I'm using lattice package for this plot)
 
-```{r,echo = TRUE}
+
+```r
 library(lattice)
+```
+
+```
+## Warning: package 'lattice' was built under R version 3.1.3
+```
+
+```r
 xyplot(steps~interval|Weekend,data=WeekendInterval,layout=c(1,2),type="l")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png) 
 
 
 - It seems that weekday mornings are more active compared to weekends where activity is more homogenously spread throughout the day.
