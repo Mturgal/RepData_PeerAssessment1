@@ -122,7 +122,9 @@ NumIncomplete <-nrow(activity)-NumComplete
 
 - The number of records with missing values is `r NumIncomplete`
   
-2.Filling Missing Values with Interval Means
+2.Devise a strategy for filling in all of the missing values in the dataset.
+
+- In order to fill the missing Values the mean for that 5-minute interval is used.
 ```{r,echo = TRUE}
 MergedData <- merge(activity,IntMean,by.x ="interval",by.y = "interval",all=TRUE)
 colnames(MergedData) <- c("interval","steps","date","IntervalMean")
